@@ -22,7 +22,7 @@ jobs:
         go-version: '1.21'
 
     - name: Build
-      run: go build -v -o ./build/  cmd/lynette/lynette.go
+      run: mage -v build
 
     - name: Test
-      run: go test -v ./...
+      run: mage -v test
