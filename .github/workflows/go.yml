@@ -22,9 +22,9 @@ jobs:
         go-version: '1.21'
 
     - name: Set up Mage
-        uses: magefile/mage-action@v2
-        with:
-          install-only: true
+      uses: magefile/mage-action@v2
+      with:
+        install-only: true
 
     - name: Build
       run: mage -v build
