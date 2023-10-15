@@ -21,7 +21,6 @@ jobs:
       with:
         go-version: '1.21'
 
-<<<<<<< HEAD
     - name: Set up Mage
       uses: magefile/mage-action@v2
       with:
@@ -32,10 +31,3 @@ jobs:
 
     - name: Test
       run: mage -v test
-=======
-    - name: Build
-      run: go build -v -o ./build/  cmd/lynette/lynette.go
-
-    - name: Test
-      run: go test -v ./...
->>>>>>> 0b3bb00 (CI pipeline)
