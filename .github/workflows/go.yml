@@ -9,11 +9,6 @@ on:
   pull_request:
     branches: [ "main" ]
 
-permissions:
-  contents: read
-  # Optional: allow read access to pull request. Use with `only-new-issues` option.
-  # pull-requests: read
-
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -27,7 +22,6 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: v1.54
-          
   build:
     runs-on: ubuntu-latest
     steps:
