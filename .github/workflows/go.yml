@@ -34,7 +34,7 @@ jobs:
       run: mage -v test
 =======
     - name: Build
-      run: go build -v ./...
+      run: go build -v -o ./build/  cmd/lynette/lynette.go
 
     - name: Test
       run: go test -v ./...
