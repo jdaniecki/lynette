@@ -16,17 +16,21 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/jdaniecki/lynette/internal/run"
+	"context"
+
+	"github.com/jdaniecki/lynette/internal/runner"
 	"github.com/spf13/cobra"
 )
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
-	Short: "Create and run new container",
+	Short: "Create and execute bash in a new container",
 	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		run.Run()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+		runner := runner.New("/bin/bash", runner.WithNewUts())
+		return runner.Run(ctx)
 	},
 }
 
