@@ -10,19 +10,37 @@ import (
 type runner struct {
 	attributes *syscall.SysProcAttr
 	binary     string
+	args       []string
 }
 
-func New(binary string) runner {
+type opt func(r *runner)
+
+func New(binary string, opts ...opt) runner {
 	r := runner{}
 	r.binary = binary
-	r.attributes = &syscall.SysProcAttr{
-		//Cloneflags: syscall.CLONE_NEWUTS,
+	r.attributes = &syscall.SysProcAttr{}
+
+	for _, o := range opts {
+		o(&r)
 	}
+
 	return r
 }
 
+func WithArgs(args ...string) opt {
+	return func(r *runner) {
+		r.args = args
+	}
+}
+
+func WithNewUts() opt {
+	return func(r *runner) {
+		r.attributes.Cloneflags |= syscall.CLONE_NEWUTS
+	}
+}
+
 func (r *runner) Run(ctx context.Context) error {
-	cmd := exec.CommandContext(ctx, r.binary)
+	cmd := exec.CommandContext(ctx, r.binary, r.args...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

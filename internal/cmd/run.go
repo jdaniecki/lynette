@@ -29,7 +29,7 @@ var runCmd = &cobra.Command{
 	Long:  ``,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
-		runner := runner.New("/bin/bash")
+		runner := runner.New("/bin/bash", runner.WithNewUts())
 		return runner.Run(ctx)
 	},
 }
