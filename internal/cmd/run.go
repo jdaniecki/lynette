@@ -18,7 +18,7 @@ package cmd
 import (
 	"context"
 
-	runner "github.com/jdaniecki/lynette/internal/run"
+	"github.com/jdaniecki/lynette/internal/runner"
 	"github.com/spf13/cobra"
 )
 

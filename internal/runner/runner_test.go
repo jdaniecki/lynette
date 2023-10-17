@@ -5,8 +5,7 @@ import (
 	"testing"
 	"time"
 
-	_ "github.com/jdaniecki/lynette/internal/run"
-	runner "github.com/jdaniecki/lynette/internal/run"
+	"github.com/jdaniecki/lynette/internal/runner"
 	"github.com/stretchr/testify/assert"
 )
 
