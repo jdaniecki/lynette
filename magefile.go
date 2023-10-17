@@ -11,7 +11,7 @@ import (
 
 // Build lynette binary
 func Build() error {
-	return sh.Run("go", "build", "-o", "build", "cmd/lynette/lynette.go")
+	return sh.Run("go", "build", "-o", "./build/lynette", "cmd/lynette/lynette.go")
 }
 
 // Execute unit tests
