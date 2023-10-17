@@ -25,7 +25,7 @@ import (
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
-	Short: "Create and run new container",
+	Short: "Create and execute bash in a new container",
 	Long:  ``,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
