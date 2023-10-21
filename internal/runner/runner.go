@@ -37,9 +37,19 @@ func WithArgs(args ...string) opt {
 }
 
 // Runner option which configures command to be executed in new UTS namespace
-func WithNewUts() opt {
+func WithNewNamespaces() opt {
 	return func(r *runner) {
-		r.attributes.Cloneflags |= syscall.CLONE_NEWUTS
+		r.attributes.Cloneflags = syscall.CLONE_NEWUTS | syscall.CLONE_NEWIPC | syscall.CLONE_NEWPID | syscall.CLONE_NEWNET | syscall.CLONE_NEWUSER
+		r.attributes.UidMappings = append(r.attributes.UidMappings, syscall.SysProcIDMap{
+			ContainerID: 0,
+			HostID:      os.Getuid(),
+			Size:        1,
+		})
+		r.attributes.GidMappings = append(r.attributes.GidMappings, syscall.SysProcIDMap{
+			ContainerID: 0,
+			HostID:      os.Getgid(),
+			Size:        1,
+		})
 	}
 }
 
