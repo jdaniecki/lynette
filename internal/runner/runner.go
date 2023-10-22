@@ -3,6 +3,7 @@ package runner
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 	"syscall"
@@ -55,11 +56,26 @@ func WithNewNamespaces() opt {
 
 // Run executes binary and waits until its completion
 func (r *runner) Run(ctx context.Context) error {
-	cmd := exec.CommandContext(ctx, r.binary, r.args...)
+	if os.Args[0] == "/proc/self/exe" { // in container ?
+		// setup container hostname
+		err := syscall.Sethostname([]byte("container"))
+		if err != nil {
+			return fmt.Errorf("container hostname setup failed: %v", err)
+		}
+
+		// execute target process
+		cmd := exec.CommandContext(ctx, r.binary, r.args...)
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		return cmd.Run()
+	}
+
+	// setup container process isolation
+	cmd := exec.CommandContext(ctx, "/proc/self/exe", os.Args[1:]...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Env = []string{"LYNETTE=true"}
 	cmd.SysProcAttr = r.attributes
 	return cmd.Run()
 }
