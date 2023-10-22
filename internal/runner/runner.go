@@ -13,6 +13,7 @@ type runner struct {
 	attributes *syscall.SysProcAttr
 	binary     string
 	args       []string
+	rootfs     string
 }
 
 // The runner constructor
@@ -20,6 +21,7 @@ func New(binary string, args ...string) *runner {
 	r := &runner{}
 	r.binary = binary
 	r.args = args
+	r.rootfs = "build/rootfs"
 	r.attributes = &syscall.SysProcAttr{
 		Cloneflags:  syscall.CLONE_NEWUTS | syscall.CLONE_NEWIPC | syscall.CLONE_NEWPID | syscall.CLONE_NEWNET | syscall.CLONE_NEWUSER,
 		UidMappings: []syscall.SysProcIDMap{{ContainerID: 0, HostID: os.Getuid(), Size: 1}},
@@ -35,6 +37,17 @@ func (r *runner) Run(ctx context.Context) error {
 		err := syscall.Sethostname([]byte("container"))
 		if err != nil {
 			return fmt.Errorf("container hostname setup failed: %v", err)
+		}
+
+		// setup rootfs
+		err = syscall.Chroot(r.rootfs)
+		if err != nil {
+			return fmt.Errorf("rootfs setup failed: %v", err)
+		}
+
+		err = os.Chdir("/")
+		if err != nil {
+			return fmt.Errorf("rootfs setup failed: %v", err)
 		}
 
 		// execute target process

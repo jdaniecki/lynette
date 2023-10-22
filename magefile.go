@@ -4,6 +4,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -28,6 +29,33 @@ func buildCoverage() error {
 // Build lynette binary
 func Build() error {
 	mg.Deps(buildGeneric, buildCoverage)
+	return nil
+}
+
+// Downloads Ubuntu 22.04 base
+func DownloadRootfs() error {
+	fsDir := filepath.Join("build", "rootfs")
+
+	if _, exists := os.Stat(fsDir); exists == nil {
+		fmt.Println("Skiping download as rootfs dir exists.")
+		return nil
+	}
+
+	err := sh.Run("mkdir", "-p", fsDir)
+	if err != nil {
+		return err
+	}
+
+	fsFile := filepath.Join("build", "ubuntu.tar.gz")
+	sh.Run("wget", "https://cdimage.ubuntu.com/ubuntu-base/releases/22.04/release/ubuntu-base-22.04-base-amd64.tar.gz", "-O", fsFile)
+	if err != nil {
+		return err
+	}
+
+	err = sh.Run("tar", "xvf", fsFile, "-C", fsDir)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
