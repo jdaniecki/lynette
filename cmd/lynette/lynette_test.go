@@ -1,4 +1,4 @@
-package runner_test
+package main_test
 
 import (
 	"context"
@@ -15,6 +15,13 @@ var lynetteBinary = os.Getenv("LYNETTE_BINARY_PATH")
 
 func init() {
 	fmt.Printf("Executing tests on %q\n", lynetteBinary)
+}
+
+func TestRootCmdFailure(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, lynetteBinary, "non-existend-command")
+	require.Error(t, cmd.Run())
 }
 
 func TestRunSuccess(t *testing.T) {
