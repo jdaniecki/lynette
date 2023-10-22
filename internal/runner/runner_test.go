@@ -1,7 +1,14 @@
 package runner_test
 
-// TODO: fix tests to work with isolation
-/*
+import (
+	"context"
+	"testing"
+	"time"
+
+	"github.com/jdaniecki/lynette/internal/runner"
+	"github.com/stretchr/testify/assert"
+)
+
 func TestRunSuccess(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
@@ -22,4 +29,3 @@ func TestRunTimeout(t *testing.T) {
 	runner := runner.New("sleep", runner.WithArgs("10"))
 	assert.Error(t, runner.Run(ctx))
 }
-*/
