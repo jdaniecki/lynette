@@ -33,16 +33,21 @@ func Build() error {
 
 // Execute unit tests
 func Test() error {
-	mg.Deps(Build)
+	mg.SerialDeps(Clean, Build)
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	buildDir := path.Join(wd, "build")
 	env := map[string]string{
-		"LYNETTE_BINARY_PATH": "../../build/lynette",
+		"LYNETTE_BINARY_PATH": filepath.Join(buildDir, "lynette"),
 	}
 	return sh.RunWith(env, "go", "test", "-v", "./...")
 }
 
 // Measure source code test coverage
 func Coverage() error {
-	mg.Deps(Build)
+	mg.SerialDeps(Clean, Build)
 
 	wd, err := os.Getwd()
 	if err != nil {

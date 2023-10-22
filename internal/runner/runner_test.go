@@ -2,6 +2,7 @@ package runner_test
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 	"testing"
@@ -11,6 +12,10 @@ import (
 )
 
 var lynetteBinary = os.Getenv("LYNETTE_BINARY_PATH")
+
+func init() {
+	fmt.Printf("Executing tests on %q\n", lynetteBinary)
+}
 
 func TestRunSuccess(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
