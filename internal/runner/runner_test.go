@@ -2,30 +2,38 @@ package runner_test
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"os/exec"
 	"testing"
 	"time"
 
-	"github.com/jdaniecki/lynette/internal/runner"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
+var lynetteBinary = os.Getenv("LYNETTE_BINARY_PATH")
+
+func init() {
+	fmt.Printf("Executing tests on %q\n", lynetteBinary)
+}
+
 func TestRunSuccess(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	runner := runner.New("true")
-	assert.NoError(t, runner.Run(ctx))
+	cmd := exec.CommandContext(ctx, lynetteBinary, "run", "true")
+	require.NoError(t, cmd.Run())
 }
 
 func TestRunFailure(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	runner := runner.New("false")
-	assert.Error(t, runner.Run(ctx))
+	cmd := exec.CommandContext(ctx, lynetteBinary, "run", "false")
+	require.Error(t, cmd.Run())
 }
 
 func TestRunTimeout(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
-	runner := runner.New("sleep", runner.WithArgs("10"))
-	assert.Error(t, runner.Run(ctx))
+	cmd := exec.CommandContext(ctx, lynetteBinary, "run", "sleep", "10")
+	require.Error(t, cmd.Run())
 }
