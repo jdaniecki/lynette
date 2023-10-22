@@ -16,9 +16,13 @@ limitations under the License.
 package main
 
 import (
+	"os"
+
 	"github.com/jdaniecki/lynette/internal/cmd"
 )
 
 func main() {
-	cmd.Execute()
+	if err := cmd.Execute(); err != nil {
+		os.Exit(1)
+	}
 }
