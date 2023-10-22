@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"context"
+	"log/slog"
 	"os"
 
 	"github.com/jdaniecki/lynette/internal/runner"
@@ -34,6 +35,7 @@ var runCmd = &cobra.Command{
 		runner := runner.New(args[0], args[1:]...)
 		if err := runner.Run(ctx); err != nil {
 			// propagate target command execution status
+			slog.Error(err.Error())
 			os.Exit(1)
 		}
 	},

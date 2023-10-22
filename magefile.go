@@ -28,12 +28,12 @@ func buildCoverage() error {
 
 // Build lynette binary
 func Build() error {
-	mg.Deps(buildGeneric, buildCoverage)
+	mg.Deps(buildGeneric, buildCoverage, downloadRootfs)
 	return nil
 }
 
 // Downloads Ubuntu 22.04 base
-func DownloadRootfs() error {
+func downloadRootfs() error {
 	fsDir := filepath.Join("build", "rootfs")
 
 	if _, exists := os.Stat(fsDir); exists == nil {
@@ -61,7 +61,7 @@ func DownloadRootfs() error {
 
 // Execute unit tests
 func Test() error {
-	mg.SerialDeps(Clean, Build)
+	mg.SerialDeps(Build)
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
@@ -69,6 +69,7 @@ func Test() error {
 	buildDir := path.Join(wd, "build")
 	env := map[string]string{
 		"LYNETTE_BINARY_PATH": filepath.Join(buildDir, "lynette"),
+		"ROOTFS":              filepath.Join(buildDir, "rootfs"),
 	}
 	return sh.RunWith(env, "go", "test", "-v", "./...")
 }
@@ -85,6 +86,7 @@ func Coverage() error {
 	coverageDir := path.Join(buildDir)
 	env := map[string]string{
 		"LYNETTE_BINARY_PATH": path.Join(buildDir, "lynette_coverage"),
+		"ROOTFS":              filepath.Join(buildDir, "rootfs"),
 		"GOCOVERDIR":          coverageDir,
 	}
 

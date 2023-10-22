@@ -21,12 +21,13 @@ func New(binary string, args ...string) *runner {
 	r := &runner{}
 	r.binary = binary
 	r.args = args
-	r.rootfs = "build/rootfs"
 	r.attributes = &syscall.SysProcAttr{
 		Cloneflags:  syscall.CLONE_NEWUTS | syscall.CLONE_NEWIPC | syscall.CLONE_NEWPID | syscall.CLONE_NEWNET | syscall.CLONE_NEWUSER,
 		UidMappings: []syscall.SysProcIDMap{{ContainerID: 0, HostID: os.Getuid(), Size: 1}},
 		GidMappings: []syscall.SysProcIDMap{{ContainerID: 0, HostID: os.Getgid(), Size: 1}},
 	}
+
+	r.rootfs = os.Getenv("ROOTFS")
 	return r
 }
 
