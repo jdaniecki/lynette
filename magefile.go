@@ -6,6 +6,7 @@ package main
 import (
 	"os"
 
+	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 )
 
@@ -21,6 +22,7 @@ func Build() error {
 
 // Execute unit tests
 func Test() error {
+	mg.Deps(Build)
 	return sh.Run("go", "test", "-v", "./...")
 }
 

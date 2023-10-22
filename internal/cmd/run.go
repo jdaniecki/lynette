@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"context"
+	"os"
 
 	"github.com/jdaniecki/lynette/internal/runner"
 	"github.com/spf13/cobra"
@@ -27,10 +28,14 @@ var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Create and execute bash in a new container",
 	Long:  ``,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Args:  cobra.MinimumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
-		runner := runner.New("/bin/bash", runner.WithNewNamespaces())
-		return runner.Run(ctx)
+		runner := runner.New(args[0], args[1:]...)
+		err := runner.Run(ctx)
+		if err != nil {
+			os.Exit(1)
+		}
 	},
 }
 
@@ -45,5 +50,5 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	//runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
