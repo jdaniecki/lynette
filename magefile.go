@@ -23,12 +23,19 @@ func Build() error {
 // Execute unit tests
 func Test() error {
 	mg.Deps(Build)
-	return sh.Run("go", "test", "-v", "./...")
+	env := map[string]string{
+		"LYNETTE_BINARY_PATH": "../../build/lynette",
+	}
+	return sh.RunWith(env, "go", "test", "-v", "./...")
 }
 
 // Measure source code test coverage
 func Coverage() error {
-	if err := sh.Run("go", "test", "-v", "./...", "-cover", "-coverprofile=build/coverage.out", "-covermode=count"); err != nil {
+	env := map[string]string{
+		"LYNETTE_BINARY_PATH": "../../build/lynette",
+	}
+
+	if err := sh.RunWith(env, "go", "test", "-v", "./...", "-cover", "-coverprofile=build/coverage.out", "-covermode=count"); err != nil {
 		return err
 	}
 	if err := sh.Run("go", "tool", "cover", "-func=build/coverage.out"); err != nil {

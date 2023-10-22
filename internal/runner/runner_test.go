@@ -2,6 +2,7 @@ package runner_test
 
 import (
 	"context"
+	"os"
 	"os/exec"
 	"testing"
 	"time"
@@ -9,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const lynetteBinary = "../../build/lynette"
+var lynetteBinary = os.Getenv("LYNETTE_BINARY_PATH")
 
 func TestRunSuccess(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
