@@ -32,8 +32,8 @@ var runCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 		runner := runner.New(args[0], args[1:]...)
-		err := runner.Run(ctx)
-		if err != nil {
+		if err := runner.Run(ctx); err != nil {
+			// propagate target command execution status
 			os.Exit(1)
 		}
 	},
