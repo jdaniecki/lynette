@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"context"
+	"os"
 
 	"github.com/jdaniecki/lynette/internal/runner"
 	"github.com/spf13/cobra"
@@ -28,10 +29,13 @@ var runCmd = &cobra.Command{
 	Short: "Create and execute bash in a new container",
 	Long:  ``,
 	Args:  cobra.MinimumNArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 		runner := runner.New(args[0], args[1:]...)
-		return runner.Run(ctx)
+		err := runner.Run(ctx)
+		if err != nil {
+			os.Exit(1)
+		}
 	},
 }
 
