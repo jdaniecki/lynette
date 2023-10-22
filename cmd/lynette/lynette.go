@@ -15,7 +15,9 @@ limitations under the License.
 */
 package main
 
-import "github.com/jdaniecki/lynette/internal/cmd"
+import (
+	"github.com/jdaniecki/lynette/internal/cmd"
+)
 
 func main() {
 	cmd.Execute()
