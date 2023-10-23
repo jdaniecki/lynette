@@ -31,10 +31,16 @@ exec: tar "xf" "build/ubuntu.tar.gz" "-C" "build/rootfs"
 ## How to run ?
 
 ```sh
-$ ./build/lynette run "$(pwd)/build/rootfs/" bash
-time=2023-10-23T09:11:02.750+02:00 level=DEBUG msg="Executing command" command="/proc/self/exe run /home/jdaniecki/projects/lynette/build/rootfs/ bash"
-time=2023-10-23T09:11:02.753+02:00 level=DEBUG msg="Setting up hostname" hostname=container
-time=2023-10-23T09:11:02.754+02:00 level=DEBUG msg="Setting up rootfs" rootfs=/home/jdaniecki/projects/lynette/build/rootfs/
-time=2023-10-23T09:11:02.754+02:00 level=DEBUG msg="Executing command" command=/usr/bin/bash
-root@container:/# 
+$ ./build/lynette run ./build/rootfs/ bash
+time=2023-10-23T20:43:12.044+02:00 level=DEBUG msg="Executing command" command="/proc/self/exe run ./build/rootfs/ bash"
+time=2023-10-23T20:43:12.046+02:00 level=DEBUG msg="Setting up hostname" hostname=container
+time=2023-10-23T20:43:12.046+02:00 level=DEBUG msg="Setting up rootfs..."
+time=2023-10-23T20:43:12.046+02:00 level=DEBUG msg="Changing root" root=./build/rootfs/
+time=2023-10-23T20:43:12.046+02:00 level=DEBUG msg="Mounting proc" proc=/proc
+time=2023-10-23T20:43:12.046+02:00 level=DEBUG msg="Executing command" command=/usr/bin/bash
+root@container:/# ps
+    PID TTY          TIME CMD
+      1 ?        00:00:00 exe
+      6 ?        00:00:00 bash
+      8 ?        00:00:00 ps
 ```
