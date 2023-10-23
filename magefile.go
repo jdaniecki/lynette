@@ -4,6 +4,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -27,13 +28,40 @@ func buildCoverage() error {
 
 // Build lynette binary
 func Build() error {
-	mg.Deps(buildGeneric, buildCoverage)
+	mg.Deps(buildGeneric, buildCoverage, downloadRootfs)
+	return nil
+}
+
+// Downloads Ubuntu 22.04 base
+func downloadRootfs() error {
+	fsDir := filepath.Join("build", "rootfs")
+
+	if _, exists := os.Stat(fsDir); exists == nil {
+		fmt.Println("Skiping download as rootfs dir exists.")
+		return nil
+	}
+
+	err := sh.Run("mkdir", "-p", fsDir)
+	if err != nil {
+		return err
+	}
+
+	fsFile := filepath.Join("build", "ubuntu.tar.gz")
+	sh.Run("wget", "https://cdimage.ubuntu.com/ubuntu-base/releases/22.04/release/ubuntu-base-22.04-base-amd64.tar.gz", "-O", fsFile)
+	if err != nil {
+		return err
+	}
+
+	err = sh.Run("tar", "xf", fsFile, "-C", fsDir)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 // Execute unit tests
 func Test() error {
-	mg.SerialDeps(Clean, Build)
+	mg.SerialDeps(Build)
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
@@ -41,6 +69,7 @@ func Test() error {
 	buildDir := path.Join(wd, "build")
 	env := map[string]string{
 		"LYNETTE_BINARY_PATH": filepath.Join(buildDir, "lynette"),
+		"ROOTFS":              filepath.Join(buildDir, "rootfs"),
 	}
 	return sh.RunWith(env, "go", "test", "-v", "./...")
 }
@@ -57,6 +86,7 @@ func Coverage() error {
 	coverageDir := path.Join(buildDir)
 	env := map[string]string{
 		"LYNETTE_BINARY_PATH": path.Join(buildDir, "lynette_coverage"),
+		"ROOTFS":              filepath.Join(buildDir, "rootfs"),
 		"GOCOVERDIR":          coverageDir,
 	}
 

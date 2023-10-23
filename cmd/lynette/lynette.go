@@ -18,11 +18,23 @@ package main
 import (
 	"os"
 
+	"log/slog"
+
 	"github.com/jdaniecki/lynette/internal/cmd"
 )
 
+var programLevel = new(slog.LevelVar)
+
+func init() {
+	h := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: programLevel})
+	slog.SetDefault(slog.New(h))
+	programLevel.Set(slog.LevelDebug)
+
+}
+
 func main() {
 	if err := cmd.Execute(); err != nil {
+		slog.Error("Root command failed", "error", err)
 		os.Exit(1)
 	}
 }
