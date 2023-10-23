@@ -52,7 +52,7 @@ func downloadRootfs() error {
 		return err
 	}
 
-	err = sh.Run("tar", "xvf", fsFile, "-C", fsDir)
+	err = sh.Run("tar", "xf", fsFile, "-C", fsDir)
 	if err != nil {
 		return err
 	}

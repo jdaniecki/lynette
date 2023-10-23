@@ -4,6 +4,7 @@ package runner
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"syscall"
@@ -17,7 +18,7 @@ type runner struct {
 }
 
 // The runner constructor
-func New(binary string, args ...string) *runner {
+func New(rootfs string, binary string, args ...string) *runner {
 	r := &runner{}
 	r.binary = binary
 	r.args = args
@@ -27,27 +28,18 @@ func New(binary string, args ...string) *runner {
 		GidMappings: []syscall.SysProcIDMap{{ContainerID: 0, HostID: os.Getgid(), Size: 1}},
 	}
 
-	r.rootfs = os.Getenv("ROOTFS")
+	r.rootfs = rootfs
 	return r
 }
 
 // Run executes binary and waits until its completion
 func (r *runner) Run(ctx context.Context) error {
 	if os.Args[0] == "/proc/self/exe" { // in container ?
-		// setup container hostname
-		err := syscall.Sethostname([]byte("container"))
-		if err != nil {
+		if err := setupHostname("container"); err != nil {
 			return fmt.Errorf("container hostname setup failed: %v", err)
 		}
 
-		// setup rootfs
-		err = syscall.Chroot(r.rootfs)
-		if err != nil {
-			return fmt.Errorf("rootfs setup failed: %v", err)
-		}
-
-		err = os.Chdir("/")
-		if err != nil {
+		if err := setupRootfs(r.rootfs); err != nil {
 			return fmt.Errorf("rootfs setup failed: %v", err)
 		}
 
@@ -56,6 +48,7 @@ func (r *runner) Run(ctx context.Context) error {
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+		slog.Debug("Executing command", "command", cmd)
 		return cmd.Run()
 	}
 
@@ -65,5 +58,23 @@ func (r *runner) Run(ctx context.Context) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.SysProcAttr = r.attributes
+	slog.Debug("Executing command", "command", cmd)
 	return cmd.Run()
+}
+
+func setupHostname(hostname string) error {
+	slog.Debug("Setting up hostname", "hostname", hostname)
+	return syscall.Sethostname([]byte(hostname))
+}
+
+func setupRootfs(rootfsPath string) error {
+	slog.Debug("Setting up rootfs", "rootfs", rootfsPath)
+	if err := syscall.Chroot(rootfsPath); err != nil {
+		return err
+	}
+
+	if err := os.Chdir("/"); err != nil {
+		return err
+	}
+	return nil
 }

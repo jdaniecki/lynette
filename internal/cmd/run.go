@@ -29,13 +29,13 @@ var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Create and execute bash in a new container",
 	Long:  ``,
-	Args:  cobra.MinimumNArgs(1),
+	Args:  cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
-		runner := runner.New(args[0], args[1:]...)
+		runner := runner.New(args[0], args[1], args[2:]...)
 		if err := runner.Run(ctx); err != nil {
 			// propagate target command execution status
-			slog.Error(err.Error())
+			slog.Error("Target command failed", "error", err)
 			os.Exit(1)
 		}
 	},
