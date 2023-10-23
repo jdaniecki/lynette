@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"syscall"
 )
 
@@ -23,7 +24,7 @@ func New(rootfs string, binary string, args ...string) *runner {
 	r.binary = binary
 	r.args = args
 	r.attributes = &syscall.SysProcAttr{
-		Cloneflags:  syscall.CLONE_NEWUTS | syscall.CLONE_NEWIPC | syscall.CLONE_NEWPID | syscall.CLONE_NEWNET | syscall.CLONE_NEWUSER,
+		Cloneflags:  syscall.CLONE_NEWNS | syscall.CLONE_NEWUTS | syscall.CLONE_NEWIPC | syscall.CLONE_NEWPID | syscall.CLONE_NEWNET | syscall.CLONE_NEWUSER,
 		UidMappings: []syscall.SysProcIDMap{{ContainerID: 0, HostID: os.Getuid(), Size: 1}},
 		GidMappings: []syscall.SysProcIDMap{{ContainerID: 0, HostID: os.Getgid(), Size: 1}},
 	}
@@ -68,7 +69,9 @@ func setupHostname(hostname string) error {
 }
 
 func setupRootfs(rootfsPath string) error {
-	slog.Debug("Setting up rootfs", "rootfs", rootfsPath)
+	slog.Debug("Setting up rootfs...")
+
+	slog.Debug("Changing root", "root", rootfsPath)
 	if err := syscall.Chroot(rootfsPath); err != nil {
 		return err
 	}
@@ -76,5 +79,16 @@ func setupRootfs(rootfsPath string) error {
 	if err := os.Chdir("/"); err != nil {
 		return err
 	}
+
+	proc := filepath.Join("/", "proc")
+	slog.Debug("Mounting proc", "proc", proc)
+	if err := os.MkdirAll(proc, 0755); err != nil {
+		return fmt.Errorf("dir creation failed: %v", err)
+	}
+
+	if err := syscall.Mount("proc", proc, "proc", 0, ""); err != nil {
+		return fmt.Errorf("mount failed: %v", err)
+	}
+
 	return nil
 }
