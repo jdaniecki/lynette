@@ -9,6 +9,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"syscall"
+
+	"github.com/jdaniecki/lynette/internal/network"
 )
 
 type runner struct {
@@ -53,6 +55,10 @@ func (r *runner) Run(ctx context.Context) error {
 		return cmd.Run()
 	}
 
+	err := network.EnsureBridge("lynette0")
+	if err != nil {
+		return err
+	}
 	// setup container process isolation
 	cmd := exec.CommandContext(ctx, "/proc/self/exe", os.Args[1:]...)
 	cmd.Stdin = os.Stdin

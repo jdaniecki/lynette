@@ -13,46 +13,55 @@ import (
 	"github.com/magefile/mage/sh"
 )
 
+var buildDir = filepath.Join(".", "build")
+var lynetteBinary = filepath.Join(buildDir, "lynette")
+var rootfsDir = filepath.Join("build", "rootfs")
+
 // Lint lynette source code
 func Lint() error {
 	return sh.Run("golangci-lint", "run")
 }
 
 func buildGeneric() error {
-	return sh.Run("go", "build", "-o", "./build/lynette", "cmd/lynette/lynette.go")
+	return sh.Run("go", "build", "-o", lynetteBinary, "cmd/lynette/lynette.go")
 }
 
 func buildCoverage() error {
-	return sh.Run("go", "build", "-cover", "-o", "./build/lynette_coverage", "cmd/lynette/lynette.go")
+	var coverageBinary = filepath.Join(buildDir, "lynette_coverage")
+	return sh.Run("go", "build", "-cover", "-o", coverageBinary, "cmd/lynette/lynette.go")
 }
 
 // Build lynette binary
 func Build() error {
-	mg.Deps(buildGeneric, buildCoverage, downloadRootfs)
+	mg.SerialDeps(buildGeneric, buildCoverage, ensureRootfs)
 	return nil
 }
 
-// Downloads Ubuntu 22.04 base
-func downloadRootfs() error {
-	fsDir := filepath.Join("build", "rootfs")
+// Run lynette binary
+func Run() error {
+	mg.SerialDeps(Clean, Build)
+	/*
+		if err := sh.Run("sudo", "setcap", "cap_net_admin+pe", lynetteBinary); err != nil {
+			return err
+		}
+		return sh.Run(lynetteBinary, "run", rootfsDir, "sh")
+	*/
+	return sh.Run("sudo", lynetteBinary, "run", rootfsDir, "sh")
+}
 
-	if _, exists := os.Stat(fsDir); exists == nil {
+// Creates rootfs
+func ensureRootfs() error {
+	if _, exists := os.Stat(rootfsDir); exists == nil {
 		fmt.Println("Skiping download as rootfs dir exists.")
 		return nil
 	}
 
-	err := sh.Run("mkdir", "-p", fsDir)
+	err := sh.Run("mkdir", "-p", rootfsDir)
 	if err != nil {
 		return err
 	}
 
-	fsFile := filepath.Join("build", "ubuntu.tar.gz")
-	sh.Run("wget", "https://cdimage.ubuntu.com/ubuntu-base/releases/22.04/release/ubuntu-base-22.04-base-amd64.tar.gz", "-O", fsFile)
-	if err != nil {
-		return err
-	}
-
-	err = sh.Run("tar", "xf", fsFile, "-C", fsDir)
+	sh.Run("sh", "-c", fmt.Sprintf("docker export $(docker create --name bb busybox) | tar -C %v -xf - && docker rm bb", rootfsDir))
 	if err != nil {
 		return err
 	}
