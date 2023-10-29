@@ -13,17 +13,22 @@ import (
 	"github.com/magefile/mage/sh"
 )
 
+var buildDir = filepath.Join(".", "build")
+var lynetteBinary = filepath.Join(buildDir, "lynette")
+var rootfsDir = filepath.Join("build", "rootfs")
+
 // Lint lynette source code
 func Lint() error {
 	return sh.Run("golangci-lint", "run")
 }
 
 func buildGeneric() error {
-	return sh.Run("go", "build", "-o", "./build/lynette", "cmd/lynette/lynette.go")
+	return sh.Run("go", "build", "-o", lynetteBinary, "cmd/lynette/lynette.go")
 }
 
 func buildCoverage() error {
-	return sh.Run("go", "build", "-cover", "-o", "./build/lynette_coverage", "cmd/lynette/lynette.go")
+	var coverageBinary = filepath.Join(buildDir, "lynette_coverage")
+	return sh.Run("go", "build", "-cover", "-o", coverageBinary, "cmd/lynette/lynette.go")
 }
 
 // Build lynette binary
@@ -32,10 +37,13 @@ func Build() error {
 	return nil
 }
 
-// Cretes rootfs
-func ensureRootfs() error {
-	rootfsDir := filepath.Join("build", "rootfs")
+// Run lynette binary
+func Run() error {
+	return sh.Run(lynetteBinary, "run", rootfsDir, "sh")
+}
 
+// Creates rootfs
+func ensureRootfs() error {
 	if _, exists := os.Stat(rootfsDir); exists == nil {
 		fmt.Println("Skiping download as rootfs dir exists.")
 		return nil
@@ -46,7 +54,7 @@ func ensureRootfs() error {
 		return err
 	}
 
-	sh.Run("sh", "-c", fmt.Sprintf("docker export $(docker create busybox) | tar -C %v -xf -", rootfsDir))
+	sh.Run("sh", "-c", fmt.Sprintf("docker export $(docker create --name bb busybox) | tar -C %v -xf - && docker rm bb", rootfsDir))
 	if err != nil {
 		return err
 	}
