@@ -55,7 +55,6 @@ func (r *runner) Run(ctx context.Context) error {
 		return cmd.Run()
 	}
 
-	// create bridge on host
 	err := network.EnsureBridge("lynette0")
 	if err != nil {
 		return err
