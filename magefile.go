@@ -28,31 +28,25 @@ func buildCoverage() error {
 
 // Build lynette binary
 func Build() error {
-	mg.Deps(buildGeneric, buildCoverage, downloadRootfs)
+	mg.SerialDeps(buildGeneric, buildCoverage, ensureRootfs)
 	return nil
 }
 
-// Downloads Ubuntu 22.04 base
-func downloadRootfs() error {
-	fsDir := filepath.Join("build", "rootfs")
+// Cretes rootfs
+func ensureRootfs() error {
+	rootfsDir := filepath.Join("build", "rootfs")
 
-	if _, exists := os.Stat(fsDir); exists == nil {
+	if _, exists := os.Stat(rootfsDir); exists == nil {
 		fmt.Println("Skiping download as rootfs dir exists.")
 		return nil
 	}
 
-	err := sh.Run("mkdir", "-p", fsDir)
+	err := sh.Run("mkdir", "-p", rootfsDir)
 	if err != nil {
 		return err
 	}
 
-	fsFile := filepath.Join("build", "ubuntu.tar.gz")
-	sh.Run("wget", "https://cdimage.ubuntu.com/ubuntu-base/releases/22.04/release/ubuntu-base-22.04-base-amd64.tar.gz", "-O", fsFile)
-	if err != nil {
-		return err
-	}
-
-	err = sh.Run("tar", "xf", fsFile, "-C", fsDir)
+	sh.Run("sh", "-c", fmt.Sprintf("docker export $(docker create busybox) | tar -C %v -xf -", rootfsDir))
 	if err != nil {
 		return err
 	}
