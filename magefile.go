@@ -39,7 +39,14 @@ func Build() error {
 
 // Run lynette binary
 func Run() error {
-	return sh.Run(lynetteBinary, "run", rootfsDir, "sh")
+	mg.SerialDeps(Clean, Build)
+	/*
+		if err := sh.Run("sudo", "setcap", "cap_net_admin+pe", lynetteBinary); err != nil {
+			return err
+		}
+		return sh.Run(lynetteBinary, "run", rootfsDir, "sh")
+	*/
+	return sh.Run("sudo", lynetteBinary, "run", rootfsDir, "sh")
 }
 
 // Creates rootfs

@@ -35,7 +35,7 @@ var runCmd = &cobra.Command{
 		runner := runner.New(args[0], args[1], args[2:]...)
 		if err := runner.Run(ctx); err != nil {
 			// propagate target command execution status
-			slog.Error("Target command failed", "error", err)
+			slog.Error("Runner failure", "error", err)
 			os.Exit(1)
 		}
 	},
